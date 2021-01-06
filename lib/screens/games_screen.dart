@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dungeon_master/models/games_data.dart';
+import 'package:dungeon_master/screens/game-dates_screen.dart';
 import 'package:dungeon_master/screens/game_details_screen.dart';
 import 'package:dungeon_master/wdgets/game_card.dart';
 import 'package:flutter/material.dart';
@@ -11,11 +13,25 @@ class GamesScreen extends StatefulWidget {
 
 class _GamesScreenState extends State<GamesScreen> with AutomaticKeepAliveClientMixin {
   final GamesData gd = GamesData();
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
     var height = MediaQuery.of(context).size.height;
+    CachedNetworkImage _loadImg(index) {
+      return CachedNetworkImage(
+          imageUrl: gd.list[index].imageUrl,
+          placeholder: (context, url) => Image.asset('assets/images/loader.gif'),
+          fit: BoxFit.fill,
+          alignment: Alignment.centerLeft,
+          errorWidget: (context, url, error) {
+            return Image.asset(
+              'assets/images/no_image.png',
+              fit: BoxFit.contain,
+              alignment: Alignment.centerLeft,
+            );
+          });
+    }
+
     return Scaffold(
       body: Center(
         child: FutureBuilder(
@@ -33,17 +49,26 @@ class _GamesScreenState extends State<GamesScreen> with AutomaticKeepAliveClient
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => GameDetailsScreen(),
+                        builder: (context) => GameDetailsScreen(image: _loadImg(index)),
                         settings: RouteSettings(arguments: gd.list[index]),
                       ),
                     );
                   },
                   child: GameCard(
-                    imageUrl: gd.list[index].imageUrl,
+                    image: _loadImg(index),
                     title: gd.list[index].name,
                     rank: gd.list[index].description,
                     year: gd.list[index].yearPublished.toString(),
                     height: height * 0.33,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => GameDates(),
+                          settings: RouteSettings(arguments: gd.list[index]),
+                        ),
+                      );
+                    },
                   ),
                 ),
               );

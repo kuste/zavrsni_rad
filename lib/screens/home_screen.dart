@@ -16,7 +16,6 @@ class _HomeScreenState extends State<HomeScreen> {
   PageController _pageController = PageController();
   int _selectedIndex = 0;
   List<Widget> _screens = [GamesScreen(), UserProfile()];
-  Auth _auth = Auth();
   void _onPageChanged(int index) {
     setState(() {
       _selectedIndex = index;
@@ -28,16 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _logout() async {
-    //Navigator.of(context).popUntil(ModalRoute.withName(LoginScreen.routeName));
     Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
     Provider.of<Auth>(context, listen: false).logout();
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    print('disposed');
   }
 
   @override

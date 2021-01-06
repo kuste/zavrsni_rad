@@ -55,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var _deviceSize = MediaQuery.of(context).size;
+    //var _deviceSize = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -118,6 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 labelStyle: TextStyle(color: Colors.black26),
                               ),
                               keyboardType: TextInputType.emailAddress,
+                              // ignore: missing_return
                               validator: (value) {
                                 if (value.isEmpty || !value.contains('@')) {
                                   return 'Invalid email!';
@@ -138,6 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               obscureText: true,
                               controller: _passwordController,
+                              // ignore: missing_return
                               validator: (value) {
                                 if (value.isEmpty || value.length < 5) {
                                   return 'Password is too short!';
@@ -160,6 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 obscureText: true,
                                 validator: _authMode == AuthMode.Signup
+                                    // ignore: missing_return
                                     ? (value) {
                                         if (value != _passwordController.text) {
                                           return 'Passwords do not match!';

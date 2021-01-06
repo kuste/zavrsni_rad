@@ -1,4 +1,6 @@
 import 'package:dungeon_master/models/auth.dart';
+import 'package:dungeon_master/models/games_data.dart';
+import 'package:dungeon_master/screens/game-dates_screen.dart';
 import 'package:dungeon_master/screens/game_details_screen.dart';
 import 'package:dungeon_master/screens/home_screen.dart';
 import 'package:dungeon_master/screens/login_screen.dart';
@@ -31,16 +33,22 @@ class MyApp extends StatelessWidget {
               ChangeNotifierProvider.value(
                 value: Auth(),
               ),
+              ChangeNotifierProvider.value(
+                value: GamesData(),
+              ),
             ],
             child: Consumer<Auth>(
               builder: (context, value, child) {
                 return MaterialApp(
                   title: 'Dungeone Master',
                   theme: ThemeData(
-                      appBarTheme: AppBarTheme(
-                        color: Colors.teal[900],
+                    primaryColor: Colors.amber,
+                    textTheme: TextTheme(
+                      bodyText2: TextStyle(
+                        color: Colors.black87,
                       ),
-                      textTheme: TextTheme(bodyText2: TextStyle(color: Colors.black87))),
+                    ),
+                  ),
                   home: value.isAuth
                       ? HomeScreen()
                       : FutureBuilder(
@@ -53,6 +61,7 @@ class MyApp extends StatelessWidget {
                     HomeScreen.routeName: (ctx) => HomeScreen(),
                     GameDetailsScreen.routeName: (ctx) => GameDetailsScreen(),
                     UserProfile.routeName: (ctx) => UserProfile(),
+                    GameDates.routeName: (ctx) => GameDates(),
                   },
                 );
               },

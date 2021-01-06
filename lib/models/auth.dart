@@ -34,7 +34,6 @@ class Auth with ChangeNotifier {
       IdTokenResult tokenResult = await res.user.getIdTokenResult();
       _token = tokenResult.token;
       _expiryDate = tokenResult.expirationTime;
-      _autoLogout();
       notifyListeners();
       final prefs = await SharedPreferences.getInstance();
       if (prefs != null) {
@@ -77,7 +76,6 @@ class Auth with ChangeNotifier {
     _userId = extractedUserData["userId"];
     _expiryDate = DateTime.tryParse(extractedUserData["exDate"]);
     notifyListeners();
-    _autoLogout();
     return true;
   }
 
@@ -102,11 +100,11 @@ class Auth with ChangeNotifier {
     }
   }
 
-  void _autoLogout() {
-    if (_authTimer != null) {
-      _authTimer.cancel();
-    }
-    final timeToExpiry = _expiryDate.difference(DateTime.now()).inSeconds;
-    _authTimer = Timer(Duration(seconds: timeToExpiry), logout);
-  }
+  // void _autoLogout() {
+  //   if (_authTimer != null) {
+  //     _authTimer.cancel();
+  //   }
+  //   final timeToExpiry = _expiryDate.difference(DateTime.now()).inSeconds;
+  //   _authTimer = Timer(Duration(seconds: timeToExpiry), logout);
+  // }
 }
