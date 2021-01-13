@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dungeon_master/models/auth.dart';
+import 'package:dungeon_master/wdgets/date_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
@@ -15,10 +16,18 @@ class GameDates extends StatefulWidget {
   _GameDatesState createState() => _GameDatesState();
 }
 
-//final List<GameReservationDatesDto> dateList = GamesData().dateList;
-
 class _GameDatesState extends State<GameDates> {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    await GamesData().fetchData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +36,9 @@ class _GameDatesState extends State<GameDates> {
     final TextEditingController _dateController = new TextEditingController();
     List<DateTime> _selectedDates = [];
     DateTime selectedDate;
-
     final gameData = Provider.of<GamesData>(context);
+
+    gameData.fetchData();
     Widget _createDatePicker = Row(
       children: [
         Expanded(
@@ -71,39 +81,29 @@ class _GameDatesState extends State<GameDates> {
             final data = snapshot.data;
             final events = data.docs.isNotEmpty ? data.docs : null;
             if (events != null) {
-              //var list = events.get("dates")[game.id] != null ? events.get("dates")[game.id] : [];
-              // for (var e in events) {
-              //   var date = e.get("dates")[game.id] != null ? e.get("dates")[game.id] : [];
-              //   print(DateTime.parse(date));
-              // }
-              List<dynamic> list = [];
-              for (QueryDocumentSnapshot e in events) {
-                // var a = e.get("dates") as Map;
-                //  print(a[game.id]);
-                // list.add(e.get("dates")[game.id]);
-              }
-              // if (list[0] != null) {
-              //   for (Timestamp l in list[1]) {
-              //     print(l.toDate().toIso8601String());
-              //     dates.add(Text(l.toDate().toIso8601String()));
-              //   }
-              // }
+              events.forEach((element) {
+                if (element.id == game.id) {
+                  var datesList = element.data()['dates'];
+                  datesList.forEach((e) => dates.add(new EventCard(date: e.toDate())));
+                }
+              });
             }
           }
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: SingleChildScrollView(
+              SingleChildScrollView(
+                padding: EdgeInsets.only(top: 18),
+                physics: NeverScrollableScrollPhysics(),
+                child: Container(
+                  height: MediaQuery.of(context).size.height * .65,
                   child: ListView.separated(
                     separatorBuilder: (context, index) => SizedBox(
                       height: 10,
                     ),
                     shrinkWrap: true,
                     itemCount: dates.length,
-                    itemBuilder: (context, index) {
-                      return dates.length > 0 ? dates[index] : Center(child: Text("No dates"));
-                    },
+                    itemBuilder: (context, index) => dates.length > 0 ? dates[index] : Center(child: Text("No dates")),
                   ),
                 ),
               ),

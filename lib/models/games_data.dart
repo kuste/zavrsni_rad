@@ -42,50 +42,60 @@ class GamesData with ChangeNotifier {
 
   List<BoardGame> get list => _list;
 
-  Map<dynamic, List<DateTime>> _events = {};
-
-  Map<dynamic, List<DateTime>> get events {
-    return {..._events};
-  }
-
-  int totalDates(dynamic id) {
-    _events.forEach((key, value) {
-      if (key == id) {
-        return value.length;
-      }
-    });
-    return 0;
-  }
-
-  List<GamesData> datesList = [];
+  Map<String, EventData> eventData = {};
   Future<void> addItem(dynamic userId, String id, DateTime date) async {
+    List<DateTime> eventList = [];
     if (date != null) {
-      if (_events.containsKey(id)) {
-        _events.update(id, (d) {
-          if (!d.contains(date)) {
-            d.add(date);
-          }
-          return d;
-        });
-      } else {
-        _events.putIfAbsent(id, () => [date]);
+      if (!eventList.contains(date)) {
+        eventList.add(date);
       }
-      if (_firestore.collection("eventsData").get() != null) {
-        await _firestore.collection("eventsData").doc(userId).set({"dates": _events});
+      if (eventData.containsKey(id)) {
+        eventData.update(id, (value) => EventData(userId: userId, dateList: [...value.dateList, date]));
       } else {
-        await _firestore.collection("eventsData").doc(userId).update({"dates": _events});
+        eventData.putIfAbsent(id, () => new EventData(userId: userId, dateList: eventList));
       }
+      try {
+        for (var item in eventData.keys) {
+          if (item == id) {
+            var doc = await _firestore.collection("eventsData").doc(item).get();
 
+            if (!doc.exists) {
+              await _firestore.collection("eventsData").doc(id).set({"dates": eventList, 'userId': userId});
+            } else {
+              await _firestore.collection("eventsData").doc(item).update({"dates": eventData[item].dateList, 'userId': eventData[item].userId});
+            }
+          }
+        }
+      } catch (e) {
+        print(e);
+      }
       notifyListeners();
+    }
+  }
+
+  Future<void> fetchData() async {
+    try {
+      var data = await _firestore.collection('eventsData').get();
+      for (var item in data.docs) {
+        eventData.putIfAbsent(
+          item.id,
+          () => new EventData(dateList: item.data()['dates'], userId: item.data()['userId']),
+        );
+      }
+    } catch (e) {
+      print(e);
     }
   }
 }
 
-class EventDates {
-  dynamic gameId;
-  DateTime dateTime;
-  EventDates({
-    this.gameId,
-    this.dateTime,
+class EventData {
+  dynamic userId;
+  List<dynamic> dateList;
+  EventData({
+    this.userId,
+    this.dateList,
   });
+  EventData.fromJson(Map<String, dynamic> json)
+      : userId = json['userId'],
+        dateList = json['dateList'] as List<dynamic>;
 }

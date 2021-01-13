@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,10 +10,13 @@ class Auth with ChangeNotifier {
   DateTime _expiryDate;
   String _userId;
   Timer _authTimer;
+  bool _isAdmin;
 
   bool get isAuth {
     return token != null;
   }
+
+  bool get isAdmin => _isAdmin;
 
   String get token {
     if (_expiryDate != null && _expiryDate.isAfter(DateTime.now()) && _token != null) {
@@ -26,6 +30,11 @@ class Auth with ChangeNotifier {
   }
 
   //static const _apikey = "AIzaSyByOwBb37ckW9r456QxJBqR9mHPLpNpYAY";
+  Future<bool> checkIfAdmin() async {
+    FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    var res = await _firestore.collection('eventsData').doc(userId).get();
+    return res.exists ? res['isAdmin'] : false;
+  }
 
   Future<void> signIn(String email, String password) async {
     try {
@@ -34,6 +43,7 @@ class Auth with ChangeNotifier {
       IdTokenResult tokenResult = await res.user.getIdTokenResult();
       _token = tokenResult.token;
       _expiryDate = tokenResult.expirationTime;
+      // _isAdmin = await checkIfAdmin();
       notifyListeners();
       final prefs = await SharedPreferences.getInstance();
       if (prefs != null) {
@@ -82,7 +92,6 @@ class Auth with ChangeNotifier {
   void logout() async {
     try {
       await FirebaseAuth.instance.signOut();
-      print(_authTimer.toString());
       _token = null;
       _userId = null;
       _expiryDate = null;
