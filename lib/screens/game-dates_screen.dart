@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dungeon_master/models/auth.dart';
-import 'package:dungeon_master/wdgets/date_card.dart';
+import 'package:dungeon_master/wdgets/user_date_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
@@ -18,6 +20,7 @@ class GameDates extends StatefulWidget {
 
 class _GameDatesState extends State<GameDates> {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  var _isSelected = false;
 
   @override
   void initState() {
@@ -70,7 +73,7 @@ class _GameDatesState extends State<GameDates> {
     Widget _createEvent = StreamBuilder<QuerySnapshot>(
         stream: _firestore.collection("eventsData").snapshots(),
         builder: (context, snapshot) {
-          List<Widget> dates = [];
+          List<dynamic> dates = [];
           if (snapshot.hasError) {
             return Center(
               child: CircularProgressIndicator(
@@ -83,8 +86,14 @@ class _GameDatesState extends State<GameDates> {
             if (events != null) {
               events.forEach((element) {
                 if (element.id == game.id) {
-                  var datesList = element.data()['dates'];
-                  datesList.forEach((e) => dates.add(new EventCard(date: e.toDate())));
+                  var eventData = element.data();
+                  List datesList = jsonDecode(eventData['dates']);
+                  if (datesList != null) {
+                    datesList.forEach((element) {
+                      print(element['dateTime']);
+                      dates.add(DateTime.parse(element['dateTime']));
+                    });
+                  }
                 }
               });
             }
@@ -103,7 +112,16 @@ class _GameDatesState extends State<GameDates> {
                     ),
                     shrinkWrap: true,
                     itemCount: dates.length,
-                    itemBuilder: (context, index) => dates.length > 0 ? dates[index] : Center(child: Text("No dates")),
+                    itemBuilder: (context, index) {
+                      var a = gameData.eventData[game.id];
+                      return UserDateCard(
+                        date: dates[index],
+                        isChecked: _isSelected,
+                        checkboxCallback: (value) {
+                          setState(() {});
+                        },
+                      );
+                    },
                   ),
                 ),
               ),
@@ -115,7 +133,7 @@ class _GameDatesState extends State<GameDates> {
                     _createDatePicker,
                     RaisedButton(
                       onPressed: () {
-                        gameData.addItem(auth.userId, game.id, selectedDate);
+                        gameData.addItem(auth.userId, game.id, selectedDate, _isSelected);
                         _dateController.clear();
                       },
                       child: Text("Confirm"),

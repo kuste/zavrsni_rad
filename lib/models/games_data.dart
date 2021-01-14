@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
+import 'package:dungeon_master/models/event_data.dart';
 import 'package:flutter/material.dart';
 import 'package:xml2json/xml2json.dart';
 
@@ -42,27 +45,29 @@ class GamesData with ChangeNotifier {
 
   List<BoardGame> get list => _list;
 
-  Map<String, EventData> eventData = {};
-  Future<void> addItem(dynamic userId, String id, DateTime date) async {
-    List<DateTime> eventList = [];
+  Map<String, EventData> _eventData = {};
+  Map<String, EventData> get eventData => _eventData;
+
+  Future<void> addItem(dynamic userId, String id, DateTime date, bool isSelected) async {
+    List<Event> eventList = [];
     if (date != null) {
       if (!eventList.contains(date)) {
-        eventList.add(date);
+        eventList.add(Event(dateTime: date, isSelected: isSelected));
       }
-      if (eventData.containsKey(id)) {
-        eventData.update(id, (value) => EventData(userId: userId, dateList: [...value.dateList, date]));
+      if (_eventData.containsKey(id)) {
+        _eventData.update(id, (value) => EventData(userId: userId, dateList: [...value.dateList, Event(dateTime: date, isSelected: isSelected)]));
       } else {
-        eventData.putIfAbsent(id, () => new EventData(userId: userId, dateList: eventList));
+        _eventData.putIfAbsent(id, () => new EventData(userId: userId, dateList: eventList));
       }
       try {
-        for (var item in eventData.keys) {
+        for (var item in _eventData.keys) {
           if (item == id) {
             var doc = await _firestore.collection("eventsData").doc(item).get();
 
             if (!doc.exists) {
-              await _firestore.collection("eventsData").doc(id).set({"dates": eventList, 'userId': userId});
+              await _firestore.collection("eventsData").doc(id).set({"dates": jsonEncode(eventList), 'userId': userId});
             } else {
-              await _firestore.collection("eventsData").doc(item).update({"dates": eventData[item].dateList, 'userId': eventData[item].userId});
+              await _firestore.collection("eventsData").doc(item).update({"dates": jsonEncode(_eventData[item].dateList), 'userId': _eventData[item].userId});
             }
           }
         }
@@ -76,26 +81,19 @@ class GamesData with ChangeNotifier {
   Future<void> fetchData() async {
     try {
       var data = await _firestore.collection('eventsData').get();
-      for (var item in data.docs) {
-        eventData.putIfAbsent(
-          item.id,
-          () => new EventData(dateList: item.data()['dates'], userId: item.data()['userId']),
-        );
+      if (data != null) {
+        for (var item in data.docs) {
+          var dateList = item.data();
+          var dates = jsonDecode(dateList['dates']) as List;
+          var d = dates.map((e) => Event(dateTime: DateTime.parse(e['dateTime']), isSelected: e['isSelected'])).toList();
+          _eventData.putIfAbsent(
+            item.id,
+            () => new EventData(dateList: d, userId: item.data()['userId']),
+          );
+        }
       }
     } catch (e) {
       print(e);
     }
   }
-}
-
-class EventData {
-  dynamic userId;
-  List<dynamic> dateList;
-  EventData({
-    this.userId,
-    this.dateList,
-  });
-  EventData.fromJson(Map<String, dynamic> json)
-      : userId = json['userId'],
-        dateList = json['dateList'] as List<dynamic>;
 }

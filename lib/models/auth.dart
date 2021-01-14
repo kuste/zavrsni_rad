@@ -10,7 +10,7 @@ class Auth with ChangeNotifier {
   DateTime _expiryDate;
   String _userId;
   Timer _authTimer;
-  bool _isAdmin;
+  bool _isAdmin = false;
 
   bool get isAuth {
     return token != null;
@@ -43,7 +43,10 @@ class Auth with ChangeNotifier {
       IdTokenResult tokenResult = await res.user.getIdTokenResult();
       _token = tokenResult.token;
       _expiryDate = tokenResult.expirationTime;
-      // _isAdmin = await checkIfAdmin();
+      var _userEmail = res.user.email;
+      if (_userEmail == 'admin@admin.com') {
+        _isAdmin = true;
+      }
       notifyListeners();
       final prefs = await SharedPreferences.getInstance();
       if (prefs != null) {
