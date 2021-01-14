@@ -87,12 +87,14 @@ class _GameDatesState extends State<GameDates> {
               events.forEach((element) {
                 if (element.id == game.id) {
                   var eventData = element.data();
-                  List datesList = jsonDecode(eventData['dates']);
-                  if (datesList != null) {
-                    datesList.forEach((element) {
-                      print(element['dateTime']);
-                      dates.add(DateTime.parse(element['dateTime']));
-                    });
+                  if (eventData != null) {
+                    List datesList = jsonDecode(eventData['dates']);
+                    if (datesList != null) {
+                      datesList.forEach((element) {
+                        print(element['dateTime']);
+                        dates.add(DateTime.parse(element['dateTime']));
+                      });
+                    }
                   }
                 }
               });
@@ -116,7 +118,7 @@ class _GameDatesState extends State<GameDates> {
                       var a = gameData.eventData[game.id];
                       return UserDateCard(
                         date: dates[index],
-                        isChecked: _isSelected,
+                        isChecked: false,
                         checkboxCallback: (value) {
                           setState(() {});
                         },

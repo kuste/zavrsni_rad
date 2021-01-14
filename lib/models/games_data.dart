@@ -48,7 +48,7 @@ class GamesData with ChangeNotifier {
   Map<String, EventData> _eventData = {};
   Map<String, EventData> get eventData => _eventData;
 
-  Future<void> addItem(dynamic userId, String id, DateTime date, bool isSelected) async {
+  Future<void> addItem(dynamic userId, String id, DateTime date, [bool isSelected = false]) async {
     List<Event> eventList = [];
     if (date != null) {
       if (!eventList.contains(date)) {
