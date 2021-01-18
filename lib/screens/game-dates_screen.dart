@@ -2,13 +2,14 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dungeon_master/models/auth.dart';
+import 'package:dungeon_master/models/board_game.dart';
+import 'package:dungeon_master/models/games_data.dart';
 import 'package:dungeon_master/wdgets/user_date_card.dart';
+import 'package:dungeon_master/wdgets/admin_date_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:dungeon_master/models/board_game.dart';
-import 'package:dungeon_master/models/games_data.dart';
 import 'package:provider/provider.dart';
 
 class GameDates extends StatefulWidget {
@@ -21,6 +22,7 @@ class GameDates extends StatefulWidget {
 class _GameDatesState extends State<GameDates> {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   var _isSelected = false;
+  List datesList = [];
 
   @override
   void initState() {
@@ -40,7 +42,6 @@ class _GameDatesState extends State<GameDates> {
     List<DateTime> _selectedDates = [];
     DateTime selectedDate;
     final gameData = Provider.of<GamesData>(context);
-
     gameData.fetchData();
     Widget _createDatePicker = Row(
       children: [
@@ -74,6 +75,7 @@ class _GameDatesState extends State<GameDates> {
         stream: _firestore.collection("eventsData").snapshots(),
         builder: (context, snapshot) {
           List<dynamic> dates = [];
+          List datesList = [];
           if (snapshot.hasError) {
             return Center(
               child: CircularProgressIndicator(
@@ -84,21 +86,26 @@ class _GameDatesState extends State<GameDates> {
             final data = snapshot.data;
             final events = data.docs.isNotEmpty ? data.docs : null;
             if (events != null) {
-              events.forEach((element) {
-                if (element.id == game.id) {
-                  var eventData = element.data();
-                  if (eventData != null) {
-                    List datesList = jsonDecode(eventData['dates']);
-                    if (datesList != null) {
-                      datesList.forEach((element) {
-                        print(element['dateTime']);
-                        dates.add(DateTime.parse(element['dateTime']));
-                      });
+              events.forEach(
+                (element) {
+                  if (element.id == game.id) {
+                    var eventData = element.data();
+                    if (eventData != null) {
+                      datesList = jsonDecode(eventData['dates']);
+                      if (datesList != null) {
+                        datesList.forEach((element) {
+                          dates.add(DateTime.parse(element['dateTime']));
+                        });
+                      }
                     }
                   }
-                }
-              });
+                },
+              );
             }
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
           }
           return Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -115,35 +122,38 @@ class _GameDatesState extends State<GameDates> {
                     shrinkWrap: true,
                     itemCount: dates.length,
                     itemBuilder: (context, index) {
-                      var a = gameData.eventData[game.id];
-                      return UserDateCard(
+                      return UserEventCard(
                         date: dates[index],
-                        isChecked: false,
-                        checkboxCallback: (value) {
-                          setState(() {});
+                        isSelected: gameData.eventData[game.id] != null ? gameData.eventData[game.id].dateList[index].isSelected : false,
+                        onTap: (value) {
+                          setState(() {
+                            gameData.eventData[game.id]?.dateList[index]?.isSelected = value;
+                          });
                         },
                       );
                     },
                   ),
                 ),
               ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * .18,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _createDatePicker,
-                    RaisedButton(
-                      onPressed: () {
-                        gameData.addItem(auth.userId, game.id, selectedDate, _isSelected);
-                        _dateController.clear();
-                      },
-                      child: Text("Confirm"),
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  ],
-                ),
-              ),
+              auth.isAdmin
+                  ? SizedBox(
+                      height: MediaQuery.of(context).size.height * .18,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _createDatePicker,
+                          RaisedButton(
+                            onPressed: () {
+                              gameData.addItem(auth.userId, game.id, selectedDate, _isSelected);
+                              _dateController.clear();
+                            },
+                            child: Text("Confirm"),
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ],
+                      ),
+                    )
+                  : Container(),
             ],
           );
         });

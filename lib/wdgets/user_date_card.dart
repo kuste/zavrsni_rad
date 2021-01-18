@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class UserDateCard extends StatelessWidget {
-  const UserDateCard({
-    this.date,
-    this.isChecked,
-    this.checkboxCallback,
+class UserEventCard extends StatelessWidget {
+  const UserEventCard({
+    @required this.date,
+    this.isSelected,
+    this.onTap,
   });
 
   final DateTime date;
-  final bool isChecked;
-  final Function checkboxCallback;
+  final bool isSelected;
+  final Function onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -23,30 +23,12 @@ class UserDateCard extends StatelessWidget {
         ),
       ),
       child: Container(
-        padding: EdgeInsets.all(20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  DateFormat('EEEE').format(date),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  DateFormat('dd.MM.yyyy. HH:mm').format(date),
-                ),
-              ],
-            ),
-            Checkbox(
-              value: isChecked,
-              onChanged: checkboxCallback,
-            ),
-          ],
+        padding: EdgeInsets.all(10),
+        child: CheckboxListTile(
+          title: Text(DateFormat('EEEE').format(date)),
+          subtitle: Text(DateFormat('dd.MM.yyyy. HH:mm').format(date)),
+          value: isSelected,
+          onChanged: onTap,
         ),
       ),
     );

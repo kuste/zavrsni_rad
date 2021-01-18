@@ -56,9 +56,9 @@ class MyApp extends StatelessWidget {
                           builder: (context, snapshot) => snapshot.connectionState == ConnectionState.waiting ? CircularProgressIndicator() : LoginScreen(),
                         ),
                   routes: {
+                    HomeScreen.routeName: (ctx) => HomeScreen(),
                     LoginScreen.routeName: (ctx) => LoginScreen(),
                     RegisterScreen.routeName: (ctx) => RegisterScreen(),
-                    HomeScreen.routeName: (ctx) => HomeScreen(),
                     GameDetailsScreen.routeName: (ctx) => GameDetailsScreen(),
                     UserProfile.routeName: (ctx) => UserProfile(),
                     GameDates.routeName: (ctx) => GameDates(),

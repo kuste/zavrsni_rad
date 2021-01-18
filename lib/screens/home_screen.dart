@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _logout() async {
-    Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
+    Navigator.of(context).pushNamedAndRemoveUntil(LoginScreen.routeName, (val) => false);
     Provider.of<Auth>(context, listen: false).logout();
   }
 

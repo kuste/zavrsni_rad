@@ -46,6 +46,8 @@ class Auth with ChangeNotifier {
       var _userEmail = res.user.email;
       if (_userEmail == 'admin@admin.com') {
         _isAdmin = true;
+      } else {
+        _isAdmin = false;
       }
       notifyListeners();
       final prefs = await SharedPreferences.getInstance();
@@ -54,6 +56,7 @@ class Auth with ChangeNotifier {
           {
             "token": _token,
             "userId": _userId,
+            'isAdmin': _isAdmin,
             "exDate": _expiryDate.toIso8601String(),
           },
         );
@@ -87,6 +90,7 @@ class Auth with ChangeNotifier {
     }
     _token = extractedUserData["token"];
     _userId = extractedUserData["userId"];
+    _isAdmin = extractedUserData["isAdmin"];
     _expiryDate = DateTime.tryParse(extractedUserData["exDate"]);
     notifyListeners();
     return true;
@@ -98,15 +102,16 @@ class Auth with ChangeNotifier {
       _token = null;
       _userId = null;
       _expiryDate = null;
+      _isAdmin = false;
       if (_authTimer != null) {
         _authTimer.cancel();
       }
       _authTimer = null;
-      notifyListeners();
       final prefs = await SharedPreferences.getInstance();
       if (prefs != null) {
         await prefs.clear();
       }
+      notifyListeners();
     } catch (e) {
       print(e);
     }
