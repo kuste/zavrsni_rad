@@ -1,4 +1,8 @@
-import 'package:dungeon_master/models/auth.dart';
+import 'package:dungeon_master/models/auth_provider.dart';
+import 'package:dungeon_master/models/user.dart';
+import 'package:dungeon_master/models/user_provider.dart';
+import 'package:dungeon_master/screens/home_screen.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -26,25 +30,47 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     _formKey.currentState.save();
-    print(
-      _authData['email'],
-    );
-    print(
-      _authData['password'],
-    );
+
     try {
       switch (_authMode) {
         case AuthMode.Login:
-          await Provider.of<Auth>(context, listen: false).signIn(
+          Future<Map<String, dynamic>> resp = Provider.of<AuthProvider>(context, listen: false).signIn(
             _authData['email'],
             _authData['password'],
           );
+          resp.then((response) {
+            if (response['status']) {
+              User user = response['user'];
+              Provider.of<UserProvider>(context, listen: false).setUser(user);
+              Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+            } else {
+              Flushbar(
+                title: "Failed Login",
+                message: response['message']['message'].toString(),
+                duration: Duration(seconds: 3),
+              ).show(context);
+            }
+          });
           break;
         case AuthMode.Signup:
-          await Provider.of<Auth>(context, listen: false).signUp(
+          await Provider.of<AuthProvider>(context, listen: false)
+              .signUp(
             _authData['email'],
             _authData['password'],
-          );
+          )
+              .then((response) {
+            if (response['status']) {
+              User user = response['data'];
+              Provider.of<UserProvider>(context, listen: false).setUser(user);
+              Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+            } else {
+              Flushbar(
+                title: "Registration Failed",
+                message: response.toString(),
+                duration: Duration(seconds: 10),
+              ).show(context);
+            }
+          });
           break;
         default:
       }

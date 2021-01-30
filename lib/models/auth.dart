@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
@@ -37,6 +38,7 @@ class Auth with ChangeNotifier {
   }
 
   Future<void> signIn(String email, String password) async {
+    _isAdmin = false;
     try {
       UserCredential res = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
       _userId = res.user.uid;
@@ -46,10 +48,7 @@ class Auth with ChangeNotifier {
       var _userEmail = res.user.email;
       if (_userEmail == 'admin@admin.com') {
         _isAdmin = true;
-      } else {
-        _isAdmin = false;
       }
-      notifyListeners();
       final prefs = await SharedPreferences.getInstance();
       if (prefs != null) {
         final userData = json.encode(
@@ -62,6 +61,7 @@ class Auth with ChangeNotifier {
         );
         prefs.setString("userData", userData);
       }
+      notifyListeners();
     } catch (e) {
       print(e);
     }
@@ -98,7 +98,6 @@ class Auth with ChangeNotifier {
 
   void logout() async {
     try {
-      await FirebaseAuth.instance.signOut();
       _token = null;
       _userId = null;
       _expiryDate = null;
@@ -111,6 +110,7 @@ class Auth with ChangeNotifier {
       if (prefs != null) {
         await prefs.clear();
       }
+      await FirebaseAuth.instance.signOut();
       notifyListeners();
     } catch (e) {
       print(e);

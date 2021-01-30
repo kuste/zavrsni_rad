@@ -11,7 +11,6 @@ class UserEventCard extends StatelessWidget {
   final DateTime date;
   final bool isSelected;
   final Function onTap;
-
   @override
   Widget build(BuildContext context) {
     return Card(

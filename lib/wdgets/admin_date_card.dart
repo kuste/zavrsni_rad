@@ -3,11 +3,10 @@ import 'package:intl/intl.dart';
 
 class AdminEventCard extends StatelessWidget {
   const AdminEventCard({
-    this.date,
+    @required this.date,
   });
 
   final DateTime date;
-
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -19,26 +18,10 @@ class AdminEventCard extends StatelessWidget {
         ),
       ),
       child: Container(
-        padding: EdgeInsets.all(20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  DateFormat('EEEE').format(date),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  DateFormat('dd.MM.yyyy. HH:mm').format(date),
-                ),
-              ],
-            ),
-          ],
+        padding: EdgeInsets.all(10),
+        child: ListTile(
+          title: Text(DateFormat('EEEE').format(date)),
+          subtitle: Text(DateFormat('dd.MM.yyyy. HH:mm').format(date)),
         ),
       ),
     );

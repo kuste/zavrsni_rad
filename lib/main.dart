@@ -1,5 +1,9 @@
 import 'package:dungeon_master/models/auth.dart';
+import 'package:dungeon_master/models/auth_provider.dart';
 import 'package:dungeon_master/models/games_data.dart';
+import 'package:dungeon_master/models/user.dart';
+import 'package:dungeon_master/models/user_preferences.dart';
+import 'package:dungeon_master/models/user_provider.dart';
 import 'package:dungeon_master/screens/game-dates_screen.dart';
 import 'package:dungeon_master/screens/game_details_screen.dart';
 import 'package:dungeon_master/screens/home_screen.dart';
@@ -19,6 +23,7 @@ class MyApp extends StatelessWidget {
   final Future<FirebaseApp> _initialization = Firebase.initializeApp();
   @override
   Widget build(BuildContext context) {
+    Future<User> getUserData() => UserPreferences().getUser();
     return FutureBuilder(
       future: _initialization,
       builder: (context, snapshot) {
@@ -30,40 +35,46 @@ class MyApp extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.done) {
           return MultiProvider(
             providers: [
-              ChangeNotifierProvider.value(
-                value: Auth(),
-              ),
-              ChangeNotifierProvider.value(
-                value: GamesData(),
-              ),
+              ChangeNotifierProvider(create: (_) => AuthProvider()),
+              ChangeNotifierProvider(create: (_) => UserProvider()),
+              ChangeNotifierProvider(create: (_) => GamesData()),
             ],
-            child: Consumer<Auth>(
-              builder: (context, value, child) {
-                return MaterialApp(
-                  title: 'Dungeone Master',
-                  theme: ThemeData(
-                    primaryColor: Colors.amber,
-                    textTheme: TextTheme(
-                      bodyText2: TextStyle(
-                        color: Colors.black87,
-                      ),
-                    ),
+            child: MaterialApp(
+              title: 'Dungeone Master',
+              theme: ThemeData(
+                primaryColor: Colors.amber,
+                textTheme: TextTheme(
+                  bodyText2: TextStyle(
+                    color: Colors.black87,
                   ),
-                  home: value.isAuth
-                      ? HomeScreen()
-                      : FutureBuilder(
-                          future: value.tryAutoLogin(),
-                          builder: (context, snapshot) => snapshot.connectionState == ConnectionState.waiting ? CircularProgressIndicator() : LoginScreen(),
-                        ),
-                  routes: {
-                    HomeScreen.routeName: (ctx) => HomeScreen(),
-                    LoginScreen.routeName: (ctx) => LoginScreen(),
-                    RegisterScreen.routeName: (ctx) => RegisterScreen(),
-                    GameDetailsScreen.routeName: (ctx) => GameDetailsScreen(),
-                    UserProfile.routeName: (ctx) => UserProfile(),
-                    GameDates.routeName: (ctx) => GameDates(),
-                  },
-                );
+                ),
+              ),
+              home: FutureBuilder(
+                future: getUserData(),
+                builder: (context, snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.none:
+                    case ConnectionState.waiting:
+                      return CircularProgressIndicator();
+                    default:
+                      if (snapshot.hasError)
+                        return Text('Error: ${snapshot.error}');
+                      else if (snapshot.data.token == null)
+                        return LoginScreen();
+                      else
+                        UserPreferences().removeUser();
+                      Provider.of<UserProvider>(context, listen: false).setUser(snapshot.data);
+                      return HomeScreen();
+                  }
+                },
+              ),
+              routes: {
+                HomeScreen.routeName: (ctx) => HomeScreen(),
+                LoginScreen.routeName: (ctx) => LoginScreen(),
+                RegisterScreen.routeName: (ctx) => RegisterScreen(),
+                GameDetailsScreen.routeName: (ctx) => GameDetailsScreen(),
+                UserProfile.routeName: (ctx) => UserProfile(),
+                GameDates.routeName: (ctx) => GameDates(),
               },
             ),
           );
