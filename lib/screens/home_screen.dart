@@ -1,7 +1,4 @@
-import 'package:dungeon_master/models/auth.dart';
 import 'package:dungeon_master/models/auth_provider.dart';
-import 'package:dungeon_master/models/user.dart';
-import 'package:dungeon_master/models/user_provider.dart';
 import 'package:dungeon_master/screens/games_screen.dart';
 import 'package:dungeon_master/screens/login_screen.dart';
 import 'package:dungeon_master/screens/user_profile_screen.dart';

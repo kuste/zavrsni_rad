@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:dungeon_master/models/event_data.dart';
@@ -33,6 +32,7 @@ class GamesData with ChangeNotifier {
         // responsedata.item.forEach((element) {
         //   list.add((BoardGame.fromJson(element)));
         // });
+        print('data loaded');
         return data;
       }
     } on DioError catch (e) {
@@ -52,7 +52,7 @@ class GamesData with ChangeNotifier {
 
   Future<void> addItem(dynamic userId, String id, DateTime date, dynamic dateId) async {
     List<Event> eventList = [];
-    _selectedDates.clear();
+
     if (date != null) {
       Event newEvent = Event(dateId: dateId, dateTime: date);
       if (!eventList.contains(newEvent)) {
@@ -130,10 +130,11 @@ class GamesData with ChangeNotifier {
     }
   }
 
-  List<SelectedEvent> _selectedDates = [];
+  static List<SelectedEvent> _selectedDates = new List<SelectedEvent>();
   List<SelectedEvent> get selectedDates => _selectedDates;
 
   Future<void> fetchData() async {
+    _selectedDates.clear();
     try {
       var data = await _firestore.collection('eventsData').get();
       if (data != null) {
@@ -143,24 +144,39 @@ class GamesData with ChangeNotifier {
           var dateList = item.data();
           if (dateList != null && dateList['dates'] != null) {
             List<dynamic> dates = dateList['dates'] as List<dynamic>;
+            var newDate;
             dates.forEach(
               (e) {
-                d.add(Event(dateTime: e['dateTime'].toDate(), dateId: e['dateId'].toString()));
-                sd.add(SelectedEvent(dateId: e['dateId'].toString(), isSelected: false));
+                if (!d.contains(e)) {
+                  d.add(Event(dateTime: e['dateTime'].toDate(), dateId: e['dateId'].toString()));
+                  newDate = Event(dateTime: e['dateTime'].toDate(), dateId: e['dateId'].toString());
+                }
+                if (!sd.contains(e)) {
+                  sd.add(SelectedEvent(dateId: e['dateId'].toString(), isSelected: false));
+                }
               },
             );
-            _eventData.putIfAbsent(
-              item.id,
-              () => new EventData(dateList: d, userId: item.data()['userId']),
-            );
+            if (_eventData.containsKey(item.id)) {
+              _eventData.update(
+                item.id,
+                (value) => new EventData(dateList: [...value.dateList, newDate], userId: item.data()['userId']),
+              );
+            } else {
+              _eventData.putIfAbsent(
+                item.id,
+                () => new EventData(dateList: d, userId: item.data()['userId']),
+              );
+            }
             var doc = await _firestore.collection("savedUserDates").doc(_auth.currentUser.uid).get();
             if (!doc.exists) {
-              _selectedDates = sd;
+              _selectedDates = List.from(sd);
             } else {
               var dateList = doc.data();
               var dates = dateList['dates'] as List<dynamic>;
               dates.forEach((e) {
-                _selectedDates.add(SelectedEvent(dateId: e['dateId'], isSelected: e['isSelected']));
+                if (!_selectedDates.contains(e)) {
+                  _selectedDates.add(SelectedEvent(dateId: e['dateId'], isSelected: e['isSelected']));
+                }
               });
             }
           }
@@ -169,33 +185,28 @@ class GamesData with ChangeNotifier {
     } catch (e) {
       print(e);
     }
+    notifyListeners();
   }
 
   Future<void> saveDates() async {
     try {
       var doc = await _firestore.collection("savedUserDates").doc(_auth.currentUser.uid).get();
-
-      if (!doc.exists) {
-        _selectedDates.forEach((element) async {
-          await _firestore.collection("savedUserDates").doc(_auth.currentUser.uid).set({
-            "dates": [
-              {
-                'dateId': element.dateId,
-                'isSelected': element.isSelected,
-              }
-            ],
+      List<dynamic> newList = new List();
+      _selectedDates.forEach((element) {
+        if (!newList.contains(element)) {
+          newList.add({
+            'dateId': element.dateId,
+            'isSelected': element.isSelected,
           });
+        }
+      });
+      if (!doc.exists) {
+        await _firestore.collection("savedUserDates").doc(_auth.currentUser.uid).set({
+          "dates": newList,
         });
       } else {
-        _selectedDates.forEach((element) async {
-          await _firestore.collection("savedUserDates").doc(_auth.currentUser.uid).update({
-            "dates": FieldValue.arrayUnion([
-              {
-                'dateId': element.dateId,
-                'isSelected': element.isSelected,
-              }
-            ]),
-          });
+        await _firestore.collection("savedUserDates").doc(_auth.currentUser.uid).update({
+          "dates": FieldValue.arrayUnion(newList),
         });
       }
     } catch (e) {

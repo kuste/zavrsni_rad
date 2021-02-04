@@ -46,8 +46,8 @@ class _LoginScreenState extends State<LoginScreen> {
             } else {
               Flushbar(
                 title: "Failed Login",
-                message: response['message']['message'].toString(),
-                duration: Duration(seconds: 3),
+                message: response['message'].toString(),
+                duration: Duration(seconds: 6),
               ).show(context);
             }
           });

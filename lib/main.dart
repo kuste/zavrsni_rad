@@ -1,4 +1,3 @@
-import 'package:dungeon_master/models/auth.dart';
 import 'package:dungeon_master/models/auth_provider.dart';
 import 'package:dungeon_master/models/games_data.dart';
 import 'package:dungeon_master/models/user.dart';
@@ -57,13 +56,13 @@ class MyApp extends StatelessWidget {
                     case ConnectionState.waiting:
                       return CircularProgressIndicator();
                     default:
+                      Provider.of<UserProvider>(context, listen: false).setUser(snapshot.data);
                       if (snapshot.hasError)
                         return Text('Error: ${snapshot.error}');
                       else if (snapshot.data.token == null)
                         return LoginScreen();
                       else
                         UserPreferences().removeUser();
-                      Provider.of<UserProvider>(context, listen: false).setUser(snapshot.data);
                       return HomeScreen();
                   }
                 },

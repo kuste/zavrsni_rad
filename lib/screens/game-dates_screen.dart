@@ -1,11 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dungeon_master/models/auth.dart';
 import 'package:dungeon_master/models/board_game.dart';
 import 'package:dungeon_master/models/event_data.dart';
 import 'package:dungeon_master/models/games_data.dart';
 import 'package:dungeon_master/models/user.dart';
 import 'package:dungeon_master/models/user_provider.dart';
-import 'package:dungeon_master/screens/user_profile_screen.dart';
 import 'package:dungeon_master/wdgets/admin_date_card.dart';
 import 'package:dungeon_master/wdgets/user_date_card.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +31,11 @@ class _GameDatesState extends State<GameDates> {
     fetchData();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future<void> fetchData() async {
     await GamesData().fetchData();
   }
@@ -46,7 +49,6 @@ class _GameDatesState extends State<GameDates> {
     DateTime selectedDate;
     var _key;
     final gameData = Provider.of<GamesData>(context);
-    gameData.fetchData();
 
     Widget stackBehindDismiss() {
       return Container(
@@ -171,7 +173,7 @@ class _GameDatesState extends State<GameDates> {
                               onTap: (value) {
                                 if (gameData.selectedDates.isNotEmpty && gameData.selectedDates != null) {
                                   var d = gameData.selectedDates.firstWhere((element) => element.dateId == dates[index].dateId);
-
+                                  print(d.dateId);
                                   setState(() {
                                     d.isSelected = value;
                                   });
