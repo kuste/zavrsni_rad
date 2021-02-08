@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dungeon_master/models/auth_provider.dart';
 import 'package:dungeon_master/models/games_data.dart';
 import 'package:dungeon_master/models/user.dart';
@@ -14,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() {
+  HttpOverrides.global = new MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
@@ -81,5 +84,14 @@ class MyApp extends StatelessWidget {
         return Center(child: CircularProgressIndicator());
       },
     );
+  }
+}
+
+//development override
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext context) {
+    return super.createHttpClient(context)..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
   }
 }

@@ -51,7 +51,7 @@ class GamesData with ChangeNotifier {
   Map<String, EventData> get eventData => _eventData;
 
   Future<void> addItem(dynamic userId, String id, DateTime date, dynamic dateId) async {
-    List<Event> eventList = [];
+    List<Event> eventList = new List();
 
     if (date != null) {
       Event newEvent = Event(dateId: dateId, dateTime: date);
@@ -206,7 +206,10 @@ class GamesData with ChangeNotifier {
         });
       } else {
         await _firestore.collection("savedUserDates").doc(_auth.currentUser.uid).update({
-          "dates": FieldValue.arrayUnion(newList),
+          "dates": FieldValue.arrayRemove(newList),
+        });
+        await _firestore.collection("savedUserDates").doc(_auth.currentUser.uid).update({
+          "dates": newList,
         });
       }
     } catch (e) {
