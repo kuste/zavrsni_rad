@@ -41,7 +41,7 @@ class AuthProvider with ChangeNotifier {
       var userId = decodedToken.nameId;
       var expDate = decodedToken.exp;
       var userEmail = decodedToken.uniqueName;
-      var isAdmin = false;
+      var isAdmin = true;
       if (userEmail == 'admin@admin.com') {
         isAdmin = true;
       }
@@ -81,7 +81,11 @@ class AuthProvider with ChangeNotifier {
       );
       final responseData = ApiResponse.fromJson(json.decode(res.body));
       print(responseData.data);
-
+      if (responseData.success) {
+        result = {'status': true, 'message': 'Successfully registered', 'data': responseData.data};
+      } else {
+        result = {'status': false, 'message': responseData.message, 'data': responseData.data};
+      }
       // var userId = res.user.uid;
       // IdTokenResult tokenResult = await res.user.getIdTokenResult();
       // var token = tokenResult.token;

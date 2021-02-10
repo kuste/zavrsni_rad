@@ -60,9 +60,11 @@ class _LoginScreenState extends State<LoginScreen> {
           )
               .then((response) {
             if (response['status']) {
-              User user = response['data'];
-              Provider.of<UserProvider>(context, listen: false).setUser(user);
-              Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+              Flushbar(
+                title: "Registration Sucess",
+                message: response.toString(),
+                duration: Duration(seconds: 10),
+              ).show(context);
             } else {
               Flushbar(
                 title: "Registration Failed",

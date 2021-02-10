@@ -1,4 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
+
 import 'package:dungeon_master/models/board_game.dart';
 import 'package:dungeon_master/models/event_data.dart';
 import 'package:dungeon_master/models/games_data.dart';
@@ -21,14 +22,10 @@ class GameDates extends StatefulWidget {
 }
 
 class _GameDatesState extends State<GameDates> {
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  List datesList = [];
-
   @override
   void initState() {
     super.initState();
-    fetchData();
+    //fetchData();
   }
 
   @override
@@ -37,18 +34,22 @@ class _GameDatesState extends State<GameDates> {
   }
 
   Future<void> fetchData() async {
-    await GamesData().fetchData();
+    var response = await GamesData().getAllEventData();
   }
+
+  // Stream<ApiResponse> _stream(Future future) async* {
+  //   yield* Stream.fromFuture(future);
+  // }
 
   @override
   Widget build(BuildContext context) {
     final BoardGame game = ModalRoute.of(context).settings.arguments;
-    final User user = Provider.of<UserProvider>(context).user;
+    final User user = Provider.of<UserProvider>(context, listen: false).user;
+    final _gamesData = Provider.of<GamesData>(context, listen: false);
     final TextEditingController _dateController = new TextEditingController();
     List<DateTime> _selectedDates = [];
     DateTime selectedDate;
     var _key;
-    final gameData = Provider.of<GamesData>(context);
 
     Widget stackBehindDismiss() {
       return Container(
@@ -91,139 +92,209 @@ class _GameDatesState extends State<GameDates> {
       ],
     );
 
-    Widget _createEvent = StreamBuilder<QuerySnapshot>(
-        stream: _firestore.collection("eventsData").snapshots(),
-        builder: (context, snapshot) {
-          List<Event> dates = [];
-          List<dynamic> datesList = [];
-          if (snapshot.hasError) {
-            return Center(
-              child: CircularProgressIndicator(
-                backgroundColor: Colors.lightBlueAccent,
-              ),
-            );
-          } else if (snapshot.hasData) {
-            final data = snapshot.data;
-            final events = data.docs.isNotEmpty ? data.docs : null;
-            if (events != null) {
-              events.forEach(
-                (element) {
-                  if (element.id == game.id) {
-                    var eventData = element.data();
-                    if (eventData != null && eventData['dates'] != null) {
-                      datesList = eventData['dates'] as List<dynamic>;
-                      if (datesList != null) {
-                        datesList.forEach((element) {
-                          dates.add(
-                            new Event(
-                              dateTime: element['dateTime'].toDate(),
-                              dateId: element['dateId'],
-                            ),
-                          );
-                        });
-                      }
-                    }
-                  }
-                },
-              );
-            }
-          } else if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SingleChildScrollView(
-                padding: EdgeInsets.only(top: 18),
-                physics: NeverScrollableScrollPhysics(),
-                child: Container(
-                  height: MediaQuery.of(context).size.height * .65,
-                  child: ListView.separated(
-                    separatorBuilder: (context, index) => SizedBox(
-                      height: 10,
-                    ),
-                    shrinkWrap: true,
-                    itemCount: dates.length,
-                    itemBuilder: (context, index) {
-                      return user.isAdmin
-                          ? Dismissible(
-                              background: stackBehindDismiss(),
-                              key: ObjectKey(Uuid().v4()),
-                              onDismissed: (direction) {
-                                var item = dates.elementAt(index);
-                                gameData.removeItem(game.id, item.dateTime);
-                                Scaffold.of(context).showSnackBar(SnackBar(
-                                    content: Text("Item deleted"),
-                                    action: SnackBarAction(
-                                        label: "UNDO",
-                                        onPressed: () {
-                                          var _key = Uuid().v1();
-                                          gameData.addItem(user.userId, game.id, item.dateTime, _key);
-                                        })));
-                              },
-                              child: AdminEventCard(
-                                date: dates[index].dateTime,
-                              ),
-                            )
-                          : UserEventCard(
-                              date: dates[index].dateTime,
-                              isSelected: gameData.selectedDates.isNotEmpty ? gameData.selectedDates.firstWhere((element) => element.dateId == dates[index].dateId).isSelected : false,
-                              onTap: (value) {
-                                if (gameData.selectedDates.isNotEmpty && gameData.selectedDates != null) {
-                                  var d = gameData.selectedDates.firstWhere((element) => element.dateId == dates[index].dateId);
-                                  print(d.dateId);
-                                  setState(() {
-                                    d.isSelected = value;
-                                  });
-                                }
-                              },
-                            );
-                    },
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * .18,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: user.isAdmin
-                      ? [
-                          _createDatePicker,
-                          RaisedButton(
-                            onPressed: () {
-                              gameData.addItem(user.userId, game.id, selectedDate, _key);
-                              _dateController.clear();
-                            },
-                            child: Text("Confirm"),
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ]
-                      : [
-                          RaisedButton(
-                            onPressed: () {
-                              gameData.saveDates();
-                              _dateController.clear();
-                            },
-                            child: Text("Confirm"),
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ],
-                ),
-              )
-            ],
-          );
-        });
+    // Widget _createEvent = StreamBuilder<List<Event>>(
+    //     stream: _stream,
+    //     initialData: _gamesData.allData,
+    //     builder: (context, snapshot) {
+    //       List<Event> dates = [];
+    //       if (snapshot.hasError) {
+    //         return Center(
+    //           child: Text('Data loading error'),
+    //         );
+    //       }
+    //       if (snapshot.hasData) {
+    //         if (snapshot.data != null) {
+    //           var data = snapshot.data;
+    //           if (data != null) {
+    //             data.forEach((e) {
+    //               if (e.gameId == game.id) {
+    //                 dates.add(Event(eventId: e.eventId, dateTime: e.dateTime));
+    //               }
+    //             });
+    //           }
+    //         }
+    //       }
+    //       if (snapshot.connectionState == ConnectionState.waiting) {
+    //         return Center(
+    //           child: CircularProgressIndicator(),
+    //         );
+    //       }
+    //       return Column(
+    //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //         children: [
+    //           SingleChildScrollView(
+    //             padding: EdgeInsets.only(top: 18),
+    //             physics: NeverScrollableScrollPhysics(),
+    //             child: Container(
+    //               height: MediaQuery.of(context).size.height * .65,
+    //               child: ListView.separated(
+    //                 separatorBuilder: (context, index) => SizedBox(
+    //                   height: 10,
+    //                 ),
+    //                 shrinkWrap: true,
+    //                 itemCount: dates.length,
+    //                 itemBuilder: (context, index) {
+    //                   return user.isAdmin
+    //                       ? Dismissible(
+    //                           background: stackBehindDismiss(),
+    //                           key: ObjectKey(Uuid().v4()),
+    //                           onDismissed: (direction) {
+    //                             // var item = dates.elementAt(index);
+    //                             // gameData.removeItem(game.id, item.dateTime);
+    //                             // Scaffold.of(context).showSnackBar(SnackBar(
+    //                             //     content: Text("Item deleted"),
+    //                             //     action: SnackBarAction(
+    //                             //         label: "UNDO",
+    //                             //         onPressed: () {
+    //                             //           var _key = Uuid().v1();
+    //                             //           gameData.addItem(user.userId, game.id, item.dateTime, _key);
+    //                             //         })));
+    //                           },
+    //                           child: AdminEventCard(
+    //                             date: dates[index].dateTime,
+    //                           ),
+    //                         )
+    //                       : UserEventCard(
+    //                           date: dates[index].dateTime,
+    //                           isSelected: false, //gameData.selectedDates.isNotEmpty ? gameData.selectedDates.firstWhere((element) => element.dateId == dates[index].dateId).isSelected : false,
+    //                           onTap: (value) {
+    //                             // if (gameData.selectedDates.isNotEmpty && gameData.selectedDates != null) {
+    //                             //   var d = gameData.selectedDates.firstWhere((element) => element.dateId == dates[index].dateId);
+    //                             //   print(d.dateId);
+    //                             //   setState(() {
+    //                             //     d.isSelected = value;
+    //                             //   });
+    //                             // }
+    //                           });
+    //                 },
+    //               ),
+    //             ),
+    //           ),
+    //           SizedBox(
+    //             height: MediaQuery.of(context).size.height * .18,
+    //             child: Column(
+    //               crossAxisAlignment: CrossAxisAlignment.stretch,
+    //               children: user.isAdmin
+    //                   ? [
+    //                       _createDatePicker,
+    //                       RaisedButton(
+    //                         onPressed: () {
+    //                           _gamesData.addEvent(
+    //                             new Event(
+    //                               eventId: _key,
+    //                               dateTime: selectedDate,
+    //                               gameId: game.id,
+    //                             ),
+    //                           );
+    //                           _dateController.clear();
+    //                         },
+    //                         child: Text("Confirm"),
+    //                         color: Theme.of(context).primaryColor,
+    //                       ),
+    //                     ]
+    //                   : [
+    //                       RaisedButton(
+    //                         onPressed: () {
+    //                           // _gamesData.addEvent();
+    //                           // _dateController.clear();
+    //                         },
+    //                         child: Text("Confirm"),
+    //                         color: Theme.of(context).primaryColor,
+    //                       ),
+    //                     ],
+    //             ),
+    //           )
+    //         ],
+    //       );
+    //     });
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Event Dates'),
         centerTitle: true,
       ),
-      body: Container(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-        child: _createEvent,
+      body: Center(
+        child: Container(
+          padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+          child: Consumer<GamesData>(
+            builder: (context, snapshot, child) {
+              if (snapshot.allData.isNotEmpty) {
+                List<Event> dates = [];
+                snapshot.allData.forEach((element) {
+                  if (element.gameId == game.id) {
+                    dates.add(element);
+                  }
+                });
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SingleChildScrollView(
+                      padding: EdgeInsets.only(top: 18),
+                      physics: NeverScrollableScrollPhysics(),
+                      child: Container(
+                        height: MediaQuery.of(context).size.height * .65,
+                        child: ListView.separated(
+                          separatorBuilder: (context, index) => SizedBox(
+                            height: 10,
+                          ),
+                          padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                          itemCount: dates.length,
+                          itemBuilder: (context, index) => Dismissible(
+                            background: stackBehindDismiss(),
+                            key: ObjectKey(Uuid().v4()),
+                            onDismissed: (direction) {
+                              // var item = dates.elementAt(index);
+                              // gameData.removeItem(game.id, item.dateTime);
+                              // Scaffold.of(context).showSnackBar(SnackBar(
+                              //     content: Text("Item deleted"),
+                              //     action: SnackBarAction(
+                              //         label: "UNDO",
+                              //         onPressed: () {
+                              //           var _key = Uuid().v1();
+                              //           gameData.addItem(user.userId, game.id, item.dateTime, _key);
+                              //         })));
+                            },
+                            child: AdminEventCard(
+                              date: dates[index].dateTime,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _createDatePicker,
+                        RaisedButton(
+                          onPressed: () {
+                            _gamesData.addEvent(
+                              new Event(
+                                eventId: _key,
+                                dateTime: selectedDate,
+                                gameId: game.id,
+                              ),
+                            );
+                            _dateController.clear();
+                          },
+                          child: Text("Confirm"),
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              } else if (snapshot == null) {
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          title: Text("Alert"),
+                          content: Text("Can't get data, please check your connection and try agan!"),
+                        ));
+              }
+              return CircularProgressIndicator();
+            },
+          ), //_createEvent,
+        ),
       ),
     );
   }

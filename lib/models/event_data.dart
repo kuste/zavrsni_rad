@@ -28,36 +28,36 @@ class UserEventData {
 }
 
 class Event {
-  dynamic dateId;
+  dynamic eventId;
   DateTime dateTime;
-  Event({
-    this.dateId,
-    this.dateTime,
-  });
+  dynamic gameId;
+  Event({this.eventId, this.dateTime, this.gameId});
 
   Event.fromJson(Map<String, dynamic> json)
-      : dateId = json['dateId'],
-        dateTime = json['dateTime'];
+      : eventId = json['eventId'],
+        dateTime = DateTime.parse(json['dateTime']),
+        gameId = json['gameId'];
 
   Map<String, dynamic> toJson() => {
-        'dateId': dateId.toString(),
+        'eventId': eventId.toString(),
         'dateTime': dateTime.toIso8601String(),
+        'gameId': dateTime.toString(),
       };
 }
 
 class SelectedEvent {
-  dynamic dateId;
+  dynamic eventId;
   bool isSelected;
   SelectedEvent({
-    this.dateId,
+    this.eventId,
     this.isSelected,
   });
   SelectedEvent.fromJson(Map<String, dynamic> json)
-      : dateId = json['dateId'],
+      : eventId = json['eventId'],
         isSelected = json['isSelected'];
 
   Map<String, dynamic> toJson() => {
-        'dateId': dateId,
+        'eventId': eventId,
         'isSelected': isSelected,
       };
 

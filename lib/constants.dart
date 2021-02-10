@@ -5,7 +5,7 @@ const String kApiUrl = '$_apiBaseUrl/search?order_by=popularty&ascending=false&p
 
 //base conn string
 const String _baseAuthConnString = 'https://localhost:44397/Auth/';
-const String _baseDataConnString = 'https://localhost:44397/Auth/';
+const String _baseDataConnString = 'https://localhost:44397/Data/';
 
 //auth api
 const String kConnLogin = '${_baseAuthConnString}Login';
@@ -14,4 +14,4 @@ const String kConnRegister = '${_baseAuthConnString}Register';
 //data api
 const String kConnDataGetAll = '${_baseDataConnString}GetAll';
 const String kConnDataGetAllForUser = '${_baseDataConnString}GetAllForUser';
-const String kConnDataAdd = '';
+const String kConnDataAdd = '${_baseDataConnString}AddEvent';
