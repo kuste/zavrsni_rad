@@ -2,11 +2,16 @@ class User {
   String token;
   DateTime expiryDate;
   String userId;
-  bool isAdmin;
+  String role;
   User({
     this.token,
     this.expiryDate,
     this.userId,
-    this.isAdmin,
+    this.role,
   });
+}
+
+class Role {
+  static final String user = 'USER';
+  static final String admin = 'ADMIN';
 }

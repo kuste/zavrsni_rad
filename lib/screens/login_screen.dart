@@ -153,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 // }
                               },
                               onSaved: (value) {
-                                _authData['email'] = value;
+                                _authData['email'] = value.trim();
                               },
                             ),
                             TextFormField(
@@ -174,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 }
                               },
                               onSaved: (value) {
-                                _authData['password'] = value;
+                                _authData['password'] = value.trim();
                               },
                             ),
                             if (_authMode == AuthMode.Signup)

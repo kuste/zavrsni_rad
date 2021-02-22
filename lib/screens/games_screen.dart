@@ -1,18 +1,34 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dungeon_master/models/board_game.dart';
+import 'package:flutter/material.dart';
+
+import 'package:dungeon_master/models/event_data.dart';
 import 'package:dungeon_master/models/games_data.dart';
 import 'package:dungeon_master/screens/game-dates_screen.dart';
 import 'package:dungeon_master/screens/game_details_screen.dart';
 import 'package:dungeon_master/wdgets/game_card.dart';
-import 'package:flutter/material.dart';
 
 class GamesScreen extends StatefulWidget {
   GamesScreen({Key key}) : super(key: key);
+
   @override
   _GamesScreenState createState() => _GamesScreenState();
 }
 
 class _GamesScreenState extends State<GamesScreen> with AutomaticKeepAliveClientMixin {
   final GamesData gd = GamesData();
+
+  @override
+  void initState() {
+    super.initState();
+    getEvents();
+  }
+
+  Future<List<Event>> getEvents() async {
+    return await gd.getAllGameData().then((value) => evntData = value);
+  }
+
+  List<Event> evntData;
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -65,7 +81,9 @@ class _GamesScreenState extends State<GamesScreen> with AutomaticKeepAliveClient
                         context,
                         MaterialPageRoute(
                           builder: (context) => GameDates(),
-                          settings: RouteSettings(arguments: gd.list[index]),
+                          settings: RouteSettings(
+                            arguments: GameRouteParams(games: gd.list[index], events: evntData.where((e) => e.gameId == gd.list[index].id).toList()),
+                          ),
                         ),
                       );
                     },
@@ -89,4 +107,13 @@ class _GamesScreenState extends State<GamesScreen> with AutomaticKeepAliveClient
 
   @override
   bool get wantKeepAlive => true;
+}
+
+class GameRouteParams {
+  BoardGame games;
+  List<Event> events;
+  GameRouteParams({
+    this.games,
+    this.events,
+  });
 }

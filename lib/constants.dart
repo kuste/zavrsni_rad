@@ -15,3 +15,5 @@ const String kConnRegister = '${_baseAuthConnString}Register';
 const String kConnDataGetAll = '${_baseDataConnString}GetAll';
 const String kConnDataGetAllForUser = '${_baseDataConnString}GetAllForUser';
 const String kConnDataAdd = '${_baseDataConnString}AddEvent';
+const String kConnDataDelete = '${_baseDataConnString}DeleteEvent';
+const String kSaveSelectedEvents = '${_baseDataConnString}SaveSelectedEvents';

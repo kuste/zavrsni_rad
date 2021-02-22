@@ -12,7 +12,7 @@ class UserPreferences {
         {
           "token": user.token,
           "userId": user.userId,
-          'isAdmin': user.isAdmin,
+          'role': user.role,
           "exDate": user.expiryDate.toIso8601String(),
         },
       );
@@ -33,7 +33,7 @@ class UserPreferences {
     User user = User(
       expiryDate: exDate,
       userId: extractedUserData["userId"],
-      isAdmin: extractedUserData["isAdmin"],
+      role: extractedUserData["role"],
       token: extractedUserData["token"],
     );
     return user;
@@ -44,7 +44,7 @@ class UserPreferences {
     prefs.clear();
   }
 
-  Future<String> getToken(args) async {
+  Future<String> getToken() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token");
     return token;

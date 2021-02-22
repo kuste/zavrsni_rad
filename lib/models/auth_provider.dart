@@ -5,7 +5,6 @@ import 'package:dungeon_master/models/api_response/api_response.dart';
 import 'package:dungeon_master/models/api_response/parse_token.dart';
 import 'package:dungeon_master/models/user.dart' as UserModel;
 import 'package:dungeon_master/models/user_preferences.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -35,21 +34,21 @@ class AuthProvider with ChangeNotifier {
         ),
       );
       final responseData = ApiResponse.fromJson(json.decode(res.body));
-      print(responseData.data);
+      if (!responseData.success) {
+        throw new Exception(responseData.message);
+      }
       var token = responseData.data;
       ParsedToken decodedToken = ParsedToken.fromJson(JwtDecoder.decode(token));
       var userId = decodedToken.nameId;
       var expDate = decodedToken.exp;
-      var userEmail = decodedToken.uniqueName;
-      var isAdmin = true;
-      if (userEmail == 'admin@admin.com') {
-        isAdmin = true;
-      }
+      //var userEmail = decodedToken.uniqueName;
+      var role = decodedToken.role;
+
       UserModel.User authUser = UserModel.User(
         userId: userId,
         token: token,
         expiryDate: new DateTime.fromMicrosecondsSinceEpoch(expDate),
-        isAdmin: isAdmin,
+        role: role,
       );
       UserPreferences().saveUser(authUser);
 
@@ -59,7 +58,10 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       _loggedInStatus = Status.NotLoggedIn;
       notifyListeners();
-      result = {'status': false, 'message': e.toString()};
+      result = {
+        'status': false,
+        'message': e.toString(),
+      };
     }
     return result;
   }
@@ -86,24 +88,6 @@ class AuthProvider with ChangeNotifier {
       } else {
         result = {'status': false, 'message': responseData.message, 'data': responseData.data};
       }
-      // var userId = res.user.uid;
-      // IdTokenResult tokenResult = await res.user.getIdTokenResult();
-      // var token = tokenResult.token;
-      // var expDate = tokenResult.expirationTime;
-      // var userEmail = res.user.email;
-      // var isAdmin = false;
-      // if (userEmail == 'admin@admin.com') {
-      //   isAdmin = true;
-      // }
-      // UserModel.User authUser = UserModel.User(
-      //   userId: userId,
-      //   token: token,
-      //   expiryDate: expDate,
-      //   isAdmin: isAdmin,
-      // );
-      // _registeredInStatus = Status.Registered;
-      // UserPreferences().saveUser(authUser);
-      // result = {'status': true, 'message': 'Successfully registered', 'data': authUser};
     } catch (e) {
       result = {'status': false, 'message': 'Registration failed', 'data': e.toString()};
     }
@@ -112,7 +96,6 @@ class AuthProvider with ChangeNotifier {
 
   void logout() async {
     try {
-      await FirebaseAuth.instance.signOut();
       UserPreferences().removeUser();
       notifyListeners();
     } catch (e) {

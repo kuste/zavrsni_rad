@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 
 class UserEventCard extends StatelessWidget {
   const UserEventCard({
@@ -14,6 +15,7 @@ class UserEventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      key: ObjectKey(Uuid().v4()),
       clipBehavior: Clip.antiAlias,
       elevation: 4,
       shape: RoundedRectangleBorder(
