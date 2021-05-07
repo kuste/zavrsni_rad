@@ -4,10 +4,10 @@ const String _apiBaseUrl = 'https://www.boardgameatlas.com/api';
 const String kApiUrl = '$_apiBaseUrl/search?order_by=popularty&ascending=false&pretty=true&client_id=$_apiKey';
 
 //base conn string
-const String _baseAuthConnString = 'https://localhost:44397/Auth/';
-const String _baseDataConnString = 'https://localhost:44397/Data/';
-// const String _baseAuthConnString = 'https://www.rathmann.hr/flutter-api/Auth/';
-// const String _baseDataConnString = 'https://www.rathmann.hr/flutter-api/Data/';
+//const String _baseAuthConnString = 'https://localhost:44397/Auth/';
+//const String _baseDataConnString = 'https://localhost:44397/Data/';
+const String _baseAuthConnString = 'https://www.rathmann.hr/flutter-api/Auth/';
+const String _baseDataConnString = 'https://www.rathmann.hr/flutter-api/Data/';
 
 //auth api
 const String kConnLogin = '${_baseAuthConnString}Login';
