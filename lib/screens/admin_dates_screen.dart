@@ -1,4 +1,4 @@
-import 'package:dungeon_master/models/event_data.dart';
+import 'package:dungeon_master/models/event.dart';
 import 'package:dungeon_master/models/games_data.dart';
 import 'package:dungeon_master/wdgets/admin_date_card.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +6,7 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:dungeon_master/models/notificaftion_manager.dart';
 
 class AdminGamesScreen extends StatefulWidget {
   final dynamic gameId;
@@ -18,6 +19,21 @@ class AdminGamesScreen extends StatefulWidget {
 
 class _AdminGamesScreenState extends State<AdminGamesScreen> {
   @override
+  void initState() {
+    super.initState();
+    //localNotificationManager.setOnNotificationReceive(onNotificationReceive);
+    //localNotificationManager.setOnNotificationClick(onNotificationClick);
+  }
+
+  // onNotificationReceive(ReceiveNotification notification) {
+  //   print('NOtification received: ${notification.id}');
+  // }
+
+  // onNotificationClick(String payload) {
+  //   print('Payload $payload');
+  // }
+
+  @override
   Widget build(BuildContext context) {
     final _gamesData = Provider.of<GamesData>(context);
     final TextEditingController _dateController = new TextEditingController();
@@ -25,19 +41,21 @@ class _AdminGamesScreenState extends State<AdminGamesScreen> {
     DateTime selectedDate;
     var _key;
 
-    var _addDate = () {
+    var _addDate = () async {
+      var newEvent = new Event(
+        eventId: _key,
+        dateTime: selectedDate,
+        gameId: widget.gameId,
+      );
       _gamesData.addEvent(
-        new Event(
-          eventId: _key,
-          dateTime: selectedDate,
-          gameId: widget.gameId,
-        ),
+        newEvent,
       );
 
       _dateController.clear();
       setState(() {
         _gamesData.getAllGameData(widget.gameId);
       });
+      //await localNotificationManager.showNOtification(newEvent);
     };
 
     Widget stackBehindDismiss() {

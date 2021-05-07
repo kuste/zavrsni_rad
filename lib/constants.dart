@@ -6,6 +6,8 @@ const String kApiUrl = '$_apiBaseUrl/search?order_by=popularty&ascending=false&p
 //base conn string
 const String _baseAuthConnString = 'https://localhost:44397/Auth/';
 const String _baseDataConnString = 'https://localhost:44397/Data/';
+// const String _baseAuthConnString = 'https://www.rathmann.hr/flutter-api/Auth/';
+// const String _baseDataConnString = 'https://www.rathmann.hr/flutter-api/Data/';
 
 //auth api
 const String kConnLogin = '${_baseAuthConnString}Login';
@@ -17,3 +19,4 @@ const String kConnDataGetAllForUser = '${_baseDataConnString}GetAllForUser';
 const String kConnDataAdd = '${_baseDataConnString}AddEvent';
 const String kConnDataDelete = '${_baseDataConnString}DeleteEvent';
 const String kSaveSelectedEvents = '${_baseDataConnString}SaveSelectedEvents';
+const String kGetEventsFormGame = '${_baseDataConnString}GetEventsForGame';

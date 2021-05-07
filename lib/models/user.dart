@@ -3,11 +3,13 @@ class User {
   DateTime expiryDate;
   String userId;
   String role;
+  String userEmail;
   User({
     this.token,
     this.expiryDate,
     this.userId,
     this.role,
+    this.userEmail,
   });
 }
 

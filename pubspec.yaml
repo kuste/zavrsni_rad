@@ -29,6 +29,8 @@ dependencies:
   uuid: ^2.2.2
   flushbar: ^1.10.4
   jwt_decoder: ^1.0.4
+  flutter_local_notifications: ^4.0.1+2
+  rxdart: ^0.25.0
   
 dev_dependencies:
   flutter_test:

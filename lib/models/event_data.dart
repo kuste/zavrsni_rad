@@ -1,21 +1,18 @@
-class Event {
-  dynamic eventId;
-  DateTime dateTime;
-  dynamic gameId;
-  bool isSelected;
+import 'package:dungeon_master/models/board_game.dart';
 
-  Event({this.eventId, this.dateTime, this.gameId, this.isSelected = false});
+class EventData {
+  BoardGame _game;
+  int _eventCount;
 
-  Event.fromJson(Map<String, dynamic> json)
-      : eventId = json['eventId'],
-        dateTime = DateTime.parse(json['dateTime']),
-        gameId = json['gameId'],
-        isSelected = json['isSelected'];
+  EventData({BoardGame game, int eventCount}) {
+    this._eventCount = eventCount;
+    this._game = game;
+  }
 
-  Map<String, dynamic> toJson() => {
-        'eventId': eventId.toString(),
-        'dateTime': dateTime.toIso8601String(),
-        'gameId': dateTime.toString(),
-        'isSelected': isSelected,
-      };
+  BoardGame get game => _game;
+  int get eventCount => _eventCount;
+
+  set eventCount(int eventCount) {
+    this._eventCount = eventCount;
+  }
 }

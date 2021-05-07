@@ -16,7 +16,7 @@ class ParsedToken {
 
   ParsedToken.fromJson(Map<String, dynamic> json)
       : nameId = json['nameid'],
-        uniqueName = json['unique-name'],
+        uniqueName = json['unique_name'],
         nbf = json['nbf'],
         exp = json['exp'],
         role = json['role'],

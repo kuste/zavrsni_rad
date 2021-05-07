@@ -1,4 +1,5 @@
 import 'package:dungeon_master/models/games_data.dart';
+import 'package:dungeon_master/models/notificaftion_manager.dart';
 import 'package:dungeon_master/wdgets/user_date_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +13,21 @@ class UserDatesScreen extends StatefulWidget {
 }
 
 class _UserDatesScreenState extends State<UserDatesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    localNotificationManager.setOnNotificationReceive(onNotificationReceive);
+    localNotificationManager.setOnNotificationClick(onNotificationClick);
+  }
+
+  onNotificationReceive(ReceiveNotification notification) {
+    //print('Notification received: ${notification.id}');
+  }
+
+  onNotificationClick(String payload) {
+    //print('Payload $payload');
+  }
+
   @override
   Widget build(BuildContext context) {
     final _gamesData = Provider.of<GamesData>(context, listen: false);
@@ -35,7 +51,6 @@ class _UserDatesScreenState extends State<UserDatesScreen> {
                   padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
                   itemCount: _gamesData.allGameData.length,
                   itemBuilder: (context, index) {
-                    print(_gamesData.allGameData);
                     return UserEventCard(
                       date: _gamesData.allGameData[index].dateTime,
                       isSelected: _gamesData.allGameData[index].isSelected,
@@ -54,9 +69,11 @@ class _UserDatesScreenState extends State<UserDatesScreen> {
               children: [
                 SizedBox(),
                 RaisedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     _gamesData.saveSelectedEvents(_gamesData.allGameData);
                     _dateController.clear();
+                    Navigator.pop(context);
+                    // await localNotificationManager.showNOtification();
                   },
                   child: Text("Confirm"),
                   color: Theme.of(context).primaryColor,

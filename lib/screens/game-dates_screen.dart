@@ -1,4 +1,3 @@
-import 'package:dungeon_master/models/event_data.dart';
 import 'package:dungeon_master/models/games_data.dart';
 import 'package:dungeon_master/models/user.dart';
 import 'package:dungeon_master/models/user_provider.dart';
@@ -16,11 +15,6 @@ class GameDates extends StatefulWidget {
 }
 
 class _GameDatesState extends State<GameDates> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   void dispose() {
     super.dispose();

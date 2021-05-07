@@ -14,6 +14,7 @@ class UserPreferences {
           "userId": user.userId,
           'role': user.role,
           "exDate": user.expiryDate.toIso8601String(),
+          "email": user.userEmail,
         },
       );
       prefs.setString("userData", userData);
@@ -35,7 +36,9 @@ class UserPreferences {
       userId: extractedUserData["userId"],
       role: extractedUserData["role"],
       token: extractedUserData["token"],
+      userEmail: extractedUserData["email"],
     );
+
     return user;
   }
 

@@ -2,11 +2,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dungeon_master/models/board_game.dart';
 import 'package:flutter/material.dart';
 
-import 'package:dungeon_master/models/event_data.dart';
+import 'package:dungeon_master/models/event.dart';
 import 'package:dungeon_master/models/games_data.dart';
 import 'package:dungeon_master/screens/game-dates_screen.dart';
 import 'package:dungeon_master/screens/game_details_screen.dart';
 import 'package:dungeon_master/wdgets/game_card.dart';
+import 'package:provider/provider.dart';
 
 class GamesScreen extends StatefulWidget {
   GamesScreen({Key key}) : super(key: key);
@@ -28,14 +29,14 @@ class _GamesScreenState extends State<GamesScreen> with AutomaticKeepAliveClient
     return await gd.getAllGameData().then((value) => evntData = value);
   }
 
-  List<Event> evntData;
+  List<Event> evntData = [];
   @override
   Widget build(BuildContext context) {
     super.build(context);
     var height = MediaQuery.of(context).size.height;
     CachedNetworkImage _loadImg(index) {
       return CachedNetworkImage(
-          imageUrl: gd.list[index].imageUrl,
+          imageUrl: gd.list[index].game.imageUrl,
           placeholder: (context, url) => Image.asset('assets/images/loader.gif'),
           fit: BoxFit.fill,
           alignment: Alignment.centerLeft,
@@ -66,27 +67,30 @@ class _GamesScreenState extends State<GamesScreen> with AutomaticKeepAliveClient
                       context,
                       MaterialPageRoute(
                         builder: (context) => GameDetailsScreen(image: _loadImg(index)),
-                        settings: RouteSettings(arguments: gd.list[index]),
+                        settings: RouteSettings(arguments: gd.list[index].game),
                       ),
                     );
                   },
-                  child: GameCard(
-                    image: _loadImg(index),
-                    title: gd.list[index].name,
-                    rank: gd.list[index].description,
-                    year: gd.list[index].yearPublished.toString(),
-                    height: height * 0.33,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => GameDates(),
-                          settings: RouteSettings(
-                            arguments: GameRouteParams(games: gd.list[index], events: evntData.where((e) => e.gameId == gd.list[index].id).toList()),
+                  child: Consumer<GamesData>(
+                    builder: (context, value, child) => GameCard(
+                      image: _loadImg(index),
+                      title: value.list[index].game.name,
+                      rank: value.list[index].game.description,
+                      year: value.list[index].game.yearPublished.toString(),
+                      height: height * 0.33,
+                      dateCount: value.list[index].eventCount,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GameDates(),
+                            settings: RouteSettings(
+                              arguments: GameRouteParams(games: gd.list[index].game, events: evntData.where((e) => e.gameId == gd.list[index].game.id).toList()),
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               );

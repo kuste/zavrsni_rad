@@ -41,14 +41,14 @@ class AuthProvider with ChangeNotifier {
       ParsedToken decodedToken = ParsedToken.fromJson(JwtDecoder.decode(token));
       var userId = decodedToken.nameId;
       var expDate = decodedToken.exp;
-      //var userEmail = decodedToken.uniqueName;
       var role = decodedToken.role;
-
+      var userEmail = decodedToken.uniqueName;
       UserModel.User authUser = UserModel.User(
         userId: userId,
         token: token,
         expiryDate: new DateTime.fromMicrosecondsSinceEpoch(expDate),
         role: role,
+        userEmail: userEmail,
       );
       UserPreferences().saveUser(authUser);
 
