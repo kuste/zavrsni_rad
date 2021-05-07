@@ -41,7 +41,7 @@ class _UserDatesScreenState extends State<UserDatesScreen> {
           children: [
             SingleChildScrollView(
               padding: EdgeInsets.only(top: 18),
-              physics: NeverScrollableScrollPhysics(),
+              physics: AlwaysScrollableScrollPhysics(),
               child: Container(
                 height: MediaQuery.of(context).size.height * .65,
                 child: ListView.separated(

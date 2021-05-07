@@ -33,14 +33,21 @@ class _GameDatesState extends State<GameDates> {
         title: Text('Event Dates'),
         centerTitle: true,
       ),
-      body: FutureBuilder(
-        future: _gamesData.getAllGameData(gameData.games.id),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return _userProvider.user.role == Role.admin ? AdminGamesScreen(game.id) : UserDatesScreen(game.id);
-          }
-          return CircularProgressIndicator();
+      body: RefreshIndicator(
+        onRefresh: () async {
+          setState(() {
+            _gamesData.getAllEventData();
+          });
         },
+        child: FutureBuilder(
+          future: _gamesData.getAllGameData(gameData.games.id),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.connectionState != ConnectionState.waiting) {
+              return _userProvider.user.role == Role.admin ? AdminGamesScreen(game.id) : UserDatesScreen(game.id);
+            }
+            return Center(child: CircularProgressIndicator());
+          },
+        ),
       ),
     );
   }

@@ -47,9 +47,9 @@ class _AdminGamesScreenState extends State<AdminGamesScreen> {
         dateTime: selectedDate,
         gameId: widget.gameId,
       );
-      _gamesData.addEvent(
-        newEvent,
-      );
+        _gamesData.addEvent(
+          newEvent,
+        );
 
       _dateController.clear();
       setState(() {

@@ -18,10 +18,11 @@ class GamesScreen extends StatefulWidget {
 
 class _GamesScreenState extends State<GamesScreen> with AutomaticKeepAliveClientMixin {
   final GamesData gd = GamesData();
-
+  GlobalKey<ScaffoldState> _scaffoldKey;
   @override
   void initState() {
     super.initState();
+    _scaffoldKey = GlobalKey();
     getEvents();
   }
 
@@ -50,60 +51,68 @@ class _GamesScreenState extends State<GamesScreen> with AutomaticKeepAliveClient
     }
 
     return Scaffold(
-      body: Center(
-        child: FutureBuilder(
-          future: gd.getDataFromUrl(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return ListView.separated(
-                separatorBuilder: (context, index) => SizedBox(
-                  height: 10,
-                ),
-                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                itemCount: gd.list.length,
-                itemBuilder: (context, index) => GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => GameDetailsScreen(image: _loadImg(index)),
-                        settings: RouteSettings(arguments: gd.list[index].game),
-                      ),
-                    );
-                  },
-                  child: Consumer<GamesData>(
-                    builder: (context, value, child) => GameCard(
-                      image: _loadImg(index),
-                      title: value.list[index].game.name,
-                      rank: value.list[index].game.description,
-                      year: value.list[index].game.yearPublished.toString(),
-                      height: height * 0.33,
-                      dateCount: value.list[index].eventCount,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => GameDates(),
-                            settings: RouteSettings(
-                              arguments: GameRouteParams(games: gd.list[index].game, events: evntData.where((e) => e.gameId == gd.list[index].game.id).toList()),
+      key: _scaffoldKey,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          setState(() {
+            getEvents();
+          });
+        },
+        child: Center(
+          child: FutureBuilder(
+            future: gd.getDataFromUrl(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.connectionState != ConnectionState.waiting) {
+                return ListView.separated(
+                  separatorBuilder: (context, index) => SizedBox(
+                    height: 10,
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                  itemCount: gd.list.length,
+                  itemBuilder: (context, index) => GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => GameDetailsScreen(image: _loadImg(index)),
+                          settings: RouteSettings(arguments: gd.list[index].game),
+                        ),
+                      );
+                    },
+                    child: Consumer<GamesData>(
+                      builder: (context, value, child) => GameCard(
+                        image: _loadImg(index),
+                        title: value.list[index].game.name,
+                        rank: value.list[index].game.description,
+                        year: value.list[index].game.yearPublished.toString(),
+                        height: height * 0.33,
+                        dateCount: value.list[index].eventCount,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GameDates(),
+                              settings: RouteSettings(
+                                arguments: GameRouteParams(games: gd.list[index].game, events: evntData.where((e) => e.gameId == gd.list[index].game.id).toList()),
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-              );
-            } else if (snapshot.hasError) {
-              showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                        title: Text("Alert"),
-                        content: Text("Can't get data, please check your connection and try agan!"),
-                      ));
-            }
-            return CircularProgressIndicator();
-          },
+                );
+              } else if (snapshot.hasError) {
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          title: Text("Alert"),
+                          content: Text("Can't get data, please check your connection and try agan!"),
+                        ));
+              }
+              return CircularProgressIndicator();
+            },
+          ),
         ),
       ),
     );

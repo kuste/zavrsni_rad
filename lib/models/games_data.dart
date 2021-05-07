@@ -22,6 +22,7 @@ class GamesData with ChangeNotifier {
       var response = await Dio().get(kApiUrl);
       if (response.statusCode == 200) {
         var data = response.data['games'] as List<dynamic>;
+        await getAllGameData();
         await getAllEventData();
         data.forEach((element) async {
           var game = BoardGame.fromJson(element);
@@ -45,10 +46,10 @@ class GamesData with ChangeNotifier {
 
   List<EventData> get list => _list;
 
-  List<Event> _allData = new List<Event>();
+  static List<Event> _allData = new List<Event>();
   List<Event> get allData => _allData;
 
-  List<Event> _allGameData = new List<Event>();
+  static List<Event> _allGameData = new List<Event>();
   List<Event> get allGameData => _allGameData;
 
   Future<List<Event>> getAllGameData([dynamic gameId]) async {
@@ -164,6 +165,7 @@ class GamesData with ChangeNotifier {
           )
           ?.toList();
       _allData = data;
+
       for (var item in _allData) {
         var eventCount = getAllDatesForGame(item.gameId);
         list.firstWhere((element) => element.game.id == item.gameId).eventCount = eventCount;
