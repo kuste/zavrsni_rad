@@ -16,8 +16,8 @@ class _UserDatesScreenState extends State<UserDatesScreen> {
   @override
   void initState() {
     super.initState();
-    localNotificationManager.setOnNotificationReceive(onNotificationReceive);
-    localNotificationManager.setOnNotificationClick(onNotificationClick);
+    // localNotificationManager.setOnNotificationReceive(onNotificationReceive);
+    // localNotificationManager.setOnNotificationClick(onNotificationClick);
   }
 
   onNotificationReceive(ReceiveNotification notification) {

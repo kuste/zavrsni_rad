@@ -40,6 +40,9 @@ class _LoginScreenState extends State<LoginScreen> {
           );
           resp.then((response) {
             if (response['status']) {
+              setState(() {
+                _isLoading = true;
+              });
               User user = response['user'];
               Provider.of<UserProvider>(context, listen: false).setUser(user);
               Navigator.pushReplacementNamed(context, HomeScreen.routeName);
@@ -75,6 +78,9 @@ class _LoginScreenState extends State<LoginScreen> {
           });
           break;
         default:
+          setState(() {
+            _isLoading = false;
+          });
       }
     } catch (e) {
       print(e);
@@ -209,6 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   elevation: 8,
                                   child: Text(_authMode == AuthMode.Login ? 'LOGIN' : 'SIGN UP'),
                                   onPressed: _submit,
+                                  disabledColor: Colors.amber.shade100,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30),
                                   ),

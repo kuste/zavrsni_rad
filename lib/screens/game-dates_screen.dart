@@ -31,23 +31,28 @@ class _GameDatesState extends State<GameDates> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Event Dates'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(
+              Icons.refresh,
+            ),
+            onPressed: () {
+              setState(() {
+                _gamesData.getAllEventData();
+              });
+            },
+          )
+        ],
         centerTitle: true,
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          setState(() {
-            _gamesData.getAllEventData();
-          });
+      body: FutureBuilder(
+        future: _gamesData.getAllGameData(gameData.games.id),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.connectionState != ConnectionState.waiting) {
+            return _userProvider.user.role == Role.admin ? AdminGamesScreen(game.id) : UserDatesScreen(game.id);
+          }
+          return Center(child: CircularProgressIndicator());
         },
-        child: FutureBuilder(
-          future: _gamesData.getAllGameData(gameData.games.id),
-          builder: (context, snapshot) {
-            if (snapshot.hasData && snapshot.connectionState != ConnectionState.waiting) {
-              return _userProvider.user.role == Role.admin ? AdminGamesScreen(game.id) : UserDatesScreen(game.id);
-            }
-            return Center(child: CircularProgressIndicator());
-          },
-        ),
       ),
     );
   }

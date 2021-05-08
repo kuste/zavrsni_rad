@@ -52,18 +52,18 @@ class _GamesScreenState extends State<GamesScreen> with AutomaticKeepAliveClient
 
     return Scaffold(
       key: _scaffoldKey,
-      body: RefreshIndicator(
-        onRefresh: () async {
-          setState(() {
-            getEvents();
-          });
-        },
-        child: Center(
-          child: FutureBuilder(
-            future: gd.getDataFromUrl(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData && snapshot.connectionState != ConnectionState.waiting) {
-                return ListView.separated(
+      body: Center(
+        child: FutureBuilder(
+          future: gd.getDataFromUrl(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.connectionState != ConnectionState.waiting) {
+              return RefreshIndicator(
+                onRefresh: () async {
+                  setState(() {
+                    getEvents();
+                  });
+                },
+                child: ListView.separated(
                   separatorBuilder: (context, index) => SizedBox(
                     height: 10,
                   ),
@@ -101,18 +101,18 @@ class _GamesScreenState extends State<GamesScreen> with AutomaticKeepAliveClient
                       ),
                     ),
                   ),
-                );
-              } else if (snapshot.hasError) {
-                showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                          title: Text("Alert"),
-                          content: Text("Can't get data, please check your connection and try agan!"),
-                        ));
-              }
-              return CircularProgressIndicator();
-            },
-          ),
+                ),
+              );
+            } else if (snapshot.hasError) {
+              showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                        title: Text("Alert"),
+                        content: Text("Can't get data, please check your connection and try agan!"),
+                      ));
+            }
+            return CircularProgressIndicator();
+          },
         ),
       ),
     );

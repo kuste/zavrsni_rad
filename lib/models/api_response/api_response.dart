@@ -1,3 +1,5 @@
+///User api response dto
+///
 class ApiResponse {
   dynamic data;
   bool success;
