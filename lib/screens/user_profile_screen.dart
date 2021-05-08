@@ -1,6 +1,5 @@
 import 'package:dungeon_master/models/games_data.dart';
 import 'package:dungeon_master/models/user.dart';
-import 'package:dungeon_master/models/user_preferences.dart';
 import 'package:dungeon_master/models/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

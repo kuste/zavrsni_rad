@@ -208,6 +208,7 @@ class GamesData with ChangeNotifier {
 
     try {
       User user = await UserPreferences().getUser();
+      // ignore: unused_local_variable
       var res = await http.post("$kSaveSelectedEvents",
           headers: {
             'Content-Type': 'application/json',
@@ -220,7 +221,6 @@ class GamesData with ChangeNotifier {
     }
   }
 
-  Future<int> getAllSelectedDatesNo() {}
   int getAllSelectedDatesForUser() {
     var data = _allData.where((e) => e.isSelected == true).toList();
     return data.length;
